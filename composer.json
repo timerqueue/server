@@ -1,0 +1,36 @@
+{
+    "name" : "ruesin/delay-server",
+    "description": "Delay queue server,support queue creation and deletion, message sending, getting and deletion.",
+    "type": "project",
+    "keywords": ["delay-queue","delay server"],
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "Ruesin Liu",
+            "email": "ruesin@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.0",
+        "ext-json": "*",
+        "ruesin/swover": "^1.1",
+        "predis/predis": "1.1.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        },
+        "files": [
+            "common/helpers.php"
+        ]
+    },
+    "prefer-stable": true,
+    "scripts": {
+        "post-root-package-install": [
+            "@php -r \"copy('./config/samples/queue.php', './config/queue.php');\"",
+            "@php -r \"copy('./config/samples/redis.php', './config/redis.php');\"",
+            "@php -r \"copy('./config/samples/secrets.php', './config/secrets.php');\"",
+            "@php -r \"copy('./config/samples/server.php', './config/server.php');\""
+        ]
+    }
+}
