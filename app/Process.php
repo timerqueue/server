@@ -14,24 +14,33 @@ class Process
             return true;
         }
 
-        $info = Queue::getDefaultInstance()->hget(Queue::queueInfoName(), $name);
-        if (! $info ) {
+        try {
+            $info = Queue::getDefaultInstance()->hget(Queue::queueInfoName(), $name);
+            if (! $info ) {
+                sleep(1);
+                return true;
+            }
+
+            $info = json_decode($info, true);
+
+            $score = time();
+
+            self::delayToActive($name, $score, $info);
+            self::readToActive($name, $score);
+
+        } catch (\Exception $e) {
+            if ( Queue::getDefaultInstance()->hexists(Queue::queueInfoName(), $name) ) {
+                Queue::getDefaultInstance()->rpush(Queue::queueListName(), $name);
+            }
             sleep(1);
-            return true;
+            throw $e;
         }
-
-        $info = json_decode($info, true);
-
-        $score = time();
-
-        self::delayToActive($name, $score, $info);
-        self::readToActive($name, $score);
 
         if ( Queue::getDefaultInstance()->hexists(Queue::queueInfoName(), $name) ) {
             Queue::getDefaultInstance()->rpush(Queue::queueListName(), $name);
         }
-
         sleep(1);
+
         return true;
     }
 
