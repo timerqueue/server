@@ -2,6 +2,7 @@
 namespace App;
 
 use App\Utils\Queue;
+use App\Utils\Redis;
 
 class Process
 {
@@ -19,9 +20,11 @@ class Process
             return true;
         }
 
+        $info = json_decode($info, true);
+
         $score = time();
 
-        self::delayToActive($name, $score);
+        self::delayToActive($name, $score, $info);
         self::readToActive($name, $score);
 
         if ( Queue::getDefaultInstance()->hexists(Queue::queueInfoName(), $name) ) {
@@ -35,7 +38,7 @@ class Process
     /**
      * 延时消息到期后转入活跃消息队列
      */
-    private static function delayToActive($name, $score)
+    private static function delayToActive($name, $score, $info)
     {
         $delays = Queue::getDelayInstance()->zrangebyscore(Queue::delayName($name), 0, $score);
 
@@ -43,9 +46,18 @@ class Process
             return true;
         }
 
-        foreach ($delays as $value) {
-            if (Queue::getDefaultInstance()->hexists(Queue::messageName($name), $value)) {
-                Queue::getActiveInstance()->rpush(Queue::activeName($name), $value);
+        if (isset($info['config']['host'])) {
+            $activeInstance  = Redis::instance('', $info['config']);
+            foreach ($delays as $messageId) {
+                if ($message = Queue::getDefaultInstance()->hget(Queue::messageName($name), $messageId)) {
+                    $activeInstance->rpush($info['list_name'], $message);
+                }
+            }
+        } else {
+            foreach ($delays as $messageId) {
+                if (Queue::getDefaultInstance()->hexists(Queue::messageName($name), $messageId)) {
+                    Queue::getActiveInstance()->rpush(Queue::activeName($name), $messageId);
+                }
             }
         }
 
