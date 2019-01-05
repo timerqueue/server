@@ -62,6 +62,7 @@ class Process
                     $activeInstance->rpush($info['list_name'], $message);
                 }
             }
+            Redis::close('', $info['config']);
         } else {
             foreach ($delays as $messageId) {
                 if (Queue::getDefaultInstance()->hexists(Queue::messageName($name), $messageId)) {
