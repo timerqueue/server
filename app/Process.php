@@ -60,6 +60,7 @@ class Process
             foreach ($delays as $messageId) {
                 if ($message = Queue::getDefaultInstance()->hget(Queue::messageName($name), $messageId)) {
                     $activeInstance->rpush($info['list_name'], $message);
+                    Queue::getDefaultInstance()->hdel(Queue::messageName($name), $messageId);
                 }
             }
             Redis::close('', $info['config']);
