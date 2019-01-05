@@ -2,6 +2,7 @@
 namespace App;
 
 use App\Utils\Queue;
+use App\Utils\Redis;
 
 class Handle
 {
@@ -26,15 +27,15 @@ class Handle
             return self::response(400, [], 'Param delay_time error!');
         }
 
-        if ( !isset($this->data['list_name']) || !$this->data['list_name'] ) {
-            return self::response(400, [], 'Param list_name error!');
-        }
-
         $information = [
             'delay_time' => intval($this->data['delay_time']),
-            'list_name'  => $this->data['list_name'],
-            'hide_time'  => isset($this->data['hide_time']) ? (intval($this->data['hide_time']) > 30 ? intval($this->data['hide_time']) : 30) : 30
+            'hide_time'  => isset($this->data['hide_time']) ? max(intval($this->data['hide_time']), 30) : 30
         ];
+
+        if (isset($this->data['config']) && !empty($this->data['config']) && isset($this->data['list_name'])) {
+            $information['list_name'] = $this->data['list_name'];
+            $information['config'] = $this->data['config'];
+        }
 
         if (Queue::getDefaultInstance()->hsetnx(Queue::queueInfoName(), $this->queue_name, json_encode($information, JSON_UNESCAPED_UNICODE))) {
             Queue::getDefaultInstance()->rpush(Queue::queueListName(), $this->queue_name);
@@ -107,6 +108,12 @@ class Handle
     public function getMessage()
     {
         $info = $this->getQueueInfo();
+
+        if( isset($info['config']['host']) ) {
+            $message = Redis::instance('', $info['config'])->lpop($info['list_name']);
+            Redis::close('', $info['config']);
+            return self::response(200, ['messageId'=>'custom-active-queue', 'content'=>$message]);
+        }
 
         $messageId = Queue::getActiveInstance()->lpop(Queue::activeName($this->queue_name));
         if (! $messageId ) {
