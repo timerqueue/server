@@ -23,7 +23,7 @@ class Process
 
             $info = json_decode($info, true);
 
-            $score = time();
+            $score = date('YmdHis');
 
             self::delayToActive($name, $score, $info);
             self::readToActive($name, $score);

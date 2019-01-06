@@ -96,7 +96,7 @@ class Handle
             $messageId = $this->GenerateUid($this->queue_name);
         } while( ! Queue::getDefaultInstance()->hsetnx(Queue::messageName($this->queue_name), $messageId, $this->data['message']) );
 
-        Queue::getDelayInstance()->zadd(Queue::delayName($this->queue_name), time() + $delay, $messageId);
+        Queue::getDelayInstance()->zadd(Queue::delayName($this->queue_name), date('YmdHis', time() + $delay), $messageId);
         return self::response(200, ['messageId' => $messageId], 'Message sent successfully!');
     }
 
