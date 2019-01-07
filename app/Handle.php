@@ -125,7 +125,7 @@ class Handle
             return self::response(400, ['messageId'=>$messageId], 'Message body does not exist!');
         }
 
-        Queue::getReadInstance()->zadd(Queue::readName($this->queue_name), time() + $info['hide_time'], $messageId);
+        Queue::getReadInstance()->zadd(Queue::readName($this->queue_name), date('YmdHis', time() + $info['hide_time']), $messageId);
 
         return self::response(200, ['messageId'=>$messageId, 'content'=>$message]);
     }
