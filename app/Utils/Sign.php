@@ -1,6 +1,8 @@
 <?php
 namespace App\Utils;
 
+use Ruesin\Utils\Config;
+
 class Sign
 {
     public static function build($request, $time, $secret)
@@ -40,7 +42,7 @@ class Sign
 
     private static function secret($secretId)
     {
-        $secrets = \Swover\Utils\Config::get('secrets');
+        $secrets = Config::get('secrets');
         return isset($secrets[$secretId]) ? $secrets[$secretId] : false;
     }
 }
