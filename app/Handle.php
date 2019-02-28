@@ -87,8 +87,13 @@ class Handle
         } else {
             $delay = $info['delay_time'];
         }
+        $deliverTime = time() + $delay;
 
-        if ($delay <= 0) {
+        if (isset($this->data['deliver_time'])) {
+            $deliverTime = intval(substr($this->data['deliver_time'], 0, 10));
+        }
+
+        if ($deliverTime < time()) {
             return self::response(400, [], 'Delay time less than 0!');
         }
 
@@ -96,7 +101,7 @@ class Handle
             $messageId = $this->GenerateUid($this->queue_name);
         } while( ! Queue::getDefaultInstance()->hsetnx(Queue::messageName($this->queue_name), $messageId, $this->data['message']) );
 
-        Queue::getDelayInstance()->zadd(Queue::delayName($this->queue_name), date('YmdHis', time() + $delay), $messageId);
+        Queue::getDelayInstance()->zadd(Queue::delayName($this->queue_name), date('YmdHis', $deliverTime), $messageId);
         return self::response(200, ['messageId' => $messageId], 'Message sent successfully!');
     }
 
