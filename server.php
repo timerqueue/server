@@ -8,7 +8,7 @@ if (!isset($argv[1])) {
     return false;
 }
 
-$config = \Swover\Utils\Config::get('server.'.$argv[1]);
+$config = \Ruesin\Utils\Config::get('server.'.$argv[1]);
 if ( !$config ) {
     return false;
 }

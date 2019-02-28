@@ -13,15 +13,16 @@
     "require": {
         "php": ">=7.0",
         "ext-json": "*",
-        "ruesin/swover": "^1.1",
-        "predis/predis": "1.1.1"
+        "swover/swover": "^1.0",
+        "ruesin/utils": "^1.0",
+        "ruesin/redis": "dev-master"
     },
     "autoload": {
         "psr-4": {
             "App\\": "app/"
         },
         "files": [
-            "common/helpers.php"
+            "app/helpers.php"
         ]
     },
     "prefer-stable": true,

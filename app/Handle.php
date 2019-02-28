@@ -2,7 +2,7 @@
 namespace App;
 
 use App\Utils\Queue;
-use App\Utils\Redis;
+use Ruesin\Utils\Redis;
 
 class Handle
 {
@@ -110,7 +110,7 @@ class Handle
         $info = $this->getQueueInfo();
 
         if( isset($info['config']['host']) ) {
-            $message = Redis::instance('', $info['config'])->lpop($info['list_name']);
+            $message = Redis::getInstance('', $info['config'])->lpop($info['list_name']);
             Redis::close('', $info['config']);
             return self::response(200, ['messageId'=>'custom-active-queue', 'content'=>$message]);
         }

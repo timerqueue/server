@@ -2,7 +2,7 @@
 namespace App;
 
 use App\Utils\Queue;
-use App\Utils\Redis;
+use Ruesin\Utils\Redis;
 
 class Process
 {
@@ -56,7 +56,7 @@ class Process
         }
 
         if (isset($info['config']['host'])) {
-            $activeInstance  = Redis::instance('', $info['config']);
+            $activeInstance  = Redis::getInstance('', $info['config']);
             foreach ($delays as $messageId) {
                 if ($message = Queue::getDefaultInstance()->hget(Queue::messageName($name), $messageId)) {
                     $activeInstance->rpush($info['list_name'], $message);

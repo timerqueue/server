@@ -1,7 +1,8 @@
 <?php
 namespace App\Utils;
 
-use Swover\Utils\Config;
+use Ruesin\Utils\Config;
+use Ruesin\Utils\Redis;
 
 class Queue
 {
@@ -59,7 +60,7 @@ class Queue
     public static function getDefaultInstance()
     {
         if (self::$defaultInstance == null) {
-            self::$defaultInstance = Redis::instance(self::getRedisKey('default'));
+            self::$defaultInstance = Redis::getInstance(self::getRedisKey('default'));
         }
         return self::$defaultInstance;
     }
@@ -71,7 +72,7 @@ class Queue
     public static function getDelayInstance()
     {
         if (self::$delayInstance == null) {
-            self::$delayInstance = Redis::instance(self::getRedisKey('delay'));
+            self::$delayInstance = Redis::getInstance(self::getRedisKey('delay'));
         }
         return self::$delayInstance;
     }
@@ -83,7 +84,7 @@ class Queue
     public static function getActiveInstance()
     {
         if (self::$activeInstance == null) {
-            self::$activeInstance = Redis::instance(self::getRedisKey('active'));
+            self::$activeInstance = Redis::getInstance(self::getRedisKey('active'));
         }
         return self::$activeInstance;
     }
@@ -95,7 +96,7 @@ class Queue
     public static function getReadInstance()
     {
         if (self::$readInstance == null) {
-            self::$readInstance = Redis::instance(self::getRedisKey('active'));
+            self::$readInstance = Redis::getInstance(self::getRedisKey('active'));
         }
         return self::$readInstance;
     }
