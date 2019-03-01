@@ -1,5 +1,5 @@
 {
-    "name" : "ruesin/delay-server",
+    "name" : "timerqueue/server",
     "description": "Delay queue server,support queue creation and deletion, message sending, getting and deletion.",
     "type": "project",
     "keywords": ["delay-queue","delay server"],
