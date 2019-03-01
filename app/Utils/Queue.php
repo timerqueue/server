@@ -6,21 +6,9 @@ use Ruesin\Utils\Redis;
 
 class Queue
 {
-    /**
-     * @var \Predis\ClientInterface
-     */
     private static $defaultInstance = null;
-    /**
-     * @var \Predis\ClientInterface
-     */
     private static $activeInstance = null;
-    /**
-     * @var \Predis\ClientInterface
-     */
     private static $delayInstance = null;
-    /**
-     * @var \Predis\ClientInterface
-     */
     private static $readInstance = null;
 
     public static function queueListName()
@@ -60,7 +48,7 @@ class Queue
     public static function getDefaultInstance()
     {
         if (self::$defaultInstance == null) {
-            self::$defaultInstance = Redis::getInstance(self::getRedisKey('default'));
+            self::$defaultInstance = self::getRedis('default');
         }
         return self::$defaultInstance;
     }
@@ -72,7 +60,7 @@ class Queue
     public static function getDelayInstance()
     {
         if (self::$delayInstance == null) {
-            self::$delayInstance = Redis::getInstance(self::getRedisKey('delay'));
+            self::$delayInstance = self::getRedis('delay');
         }
         return self::$delayInstance;
     }
@@ -84,7 +72,7 @@ class Queue
     public static function getActiveInstance()
     {
         if (self::$activeInstance == null) {
-            self::$activeInstance = Redis::getInstance(self::getRedisKey('active'));
+            self::$activeInstance = self::getRedis('active');
         }
         return self::$activeInstance;
     }
@@ -96,16 +84,20 @@ class Queue
     public static function getReadInstance()
     {
         if (self::$readInstance == null) {
-            self::$readInstance = Redis::getInstance(self::getRedisKey('active'));
+            self::$readInstance = self::getRedis('read');
         }
         return self::$readInstance;
     }
 
     /**
-     * 获取指定Redis配置文件的key
+     * 获取指定key的Redis实例
      */
-    private static function getRedisKey($key)
+    private static function getRedis($key)
     {
-        return Config::get('queue.redis_key.'.$key, $key);
+        $config = Config::get('redis.'.$key);
+        if (empty($config)) {
+            $config = Config::get('redis.default');
+        }
+        return Redis::getInstance('', $config);
     }
 }
