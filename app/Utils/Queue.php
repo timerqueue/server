@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Utils;
 
 use Ruesin\Utils\Config;
@@ -23,22 +24,22 @@ class Queue
 
     public static function delayName($queue_name)
     {
-        return $queue_name.Config::get('queue.delay_suffix');
+        return $queue_name . Config::get('queue.delay_suffix');
     }
 
     public static function messageName($queue_name)
     {
-        return $queue_name.Config::get('queue.message_suffix');
+        return $queue_name . Config::get('queue.message_suffix');
     }
 
     public static function activeName($queue_name)
     {
-        return $queue_name.Config::get('quque.active_suffix');
+        return $queue_name . Config::get('quque.active_suffix');
     }
 
     public static function readName($queue_name)
     {
-        return $queue_name.Config::get('queue.read_suffix');
+        return $queue_name . Config::get('queue.read_suffix');
     }
 
     /**
@@ -94,10 +95,6 @@ class Queue
      */
     private static function getRedis($key)
     {
-        $config = Config::get('redis.'.$key);
-        if (empty($config)) {
-            $config = Config::get('redis.default');
-        }
-        return Redis::getInstance('', $config);
+        return Redis::getInstance($key);
     }
 }

@@ -2,7 +2,7 @@
     "name" : "timerqueue/server",
     "description": "Delay queue server,support queue creation and deletion, message sending, getting and deletion.",
     "type": "project",
-    "keywords": ["delay-queue","delay server"],
+    "keywords": ["delay-queue","delay-server"],
     "license": "Apache-2.0",
     "authors": [
         {
@@ -13,7 +13,7 @@
     "require": {
         "php": ">=7.0",
         "ext-json": "*",
-        "swover/swover": "^1.0",
+        "swover/swover": "dev-master",
         "ruesin/utils": "^1.0",
         "ruesin/redis": "dev-master"
     },
