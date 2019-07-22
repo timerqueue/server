@@ -1,8 +1,5 @@
 <?php
-define('ROOT_DIR', dirname(__DIR__) . '/');
-
-require_once ROOT_DIR . 'vendor/autoload.php';
-
+require_once dirname(__DIR__) . '/vendor/autoload.php';
 $data = [
     'get' => $_GET,
     'post' => $_POST,

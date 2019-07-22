@@ -22,7 +22,7 @@
             "App\\": "app/"
         },
         "files": [
-            "app/helpers.php"
+            "app/bootstrap.php"
         ]
     },
     "prefer-stable": true,
@@ -33,5 +33,9 @@
             "@php -r \"copy('./config/samples/secrets.php', './config/secrets.php');\"",
             "@php -r \"copy('./config/samples/server.php', './config/server.php');\""
         ]
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6",
+        "guzzlehttp/guzzle": "^6.3"
     }
 }
