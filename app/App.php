@@ -3,6 +3,10 @@
 namespace App;
 
 use App\Queue\Base;
+use App\Queue\Timeout;
+use App\Queue\Wakeup;
+use App\Utils\Queue;
+use Swover\Utils\Request;
 
 class App
 {
@@ -29,6 +33,42 @@ class App
         } catch (\Exception $e) {
             return Base::response(500, [], $e->getMessage());
         }
+    }
+
+    public static function process()
+    {
+        sleep(1);
+        $result = true;
+
+        $name = Queue::getDefaultInstance()->lpop(Queue::queueListName());
+        if (!$name) return $result;
+
+        try {
+            $info = Queue::getDefaultInstance()->hget(Queue::queueInfoName(), $name);
+            if (!$info) {
+                return $result;
+            }
+
+            $request = new Request(['get'=>[
+                'queue_name' => $name,
+                'data' => [
+                    'info' => json_decode($info, true),
+                    'score' => date('YmdHis')
+                ]
+            ]]);
+
+            (new Wakeup($request))->handle();
+            (new Timeout($request))->handle();
+
+        } catch (\Exception $e) {
+            $result = false;
+        }
+
+        if (Queue::getDefaultInstance()->hexists(Queue::queueInfoName(), $name)) {
+            Queue::getDefaultInstance()->rpush(Queue::queueListName(), $name);
+        }
+
+        return $result;
     }
 
     /**
