@@ -115,9 +115,8 @@ class Handle
         $info = $this->getQueueInfo();
 
         if( isset($info['config']['host']) ) {
-            Redis::setConfig($info['list_name'], $info['config']); //TODO
-            $message = Redis::getInstance($info['list_name'])->lpop($info['list_name']);
-            Redis::close($info['list_name']);
+            $message = Redis::createInstance($info['list_name'], $info['config'])
+                ->lpop($info['list_name']);
             return self::response(200, ['messageId'=>'custom-active-queue', 'content'=>$message]);
         }
 

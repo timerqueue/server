@@ -53,15 +53,13 @@ class Process
         }
 
         if (isset($info['config']['host'])) {
-            Redis::setConfig($name, $info['config']); //TODO
-            $activeInstance = Redis::getInstance($name);
+            $activeInstance = Redis::createInstance($name, $info['config']);
             foreach ($delays as $messageId) {
                 if ($message = Queue::getDefaultInstance()->hget(Queue::messageName($name), $messageId)) {
                     $activeInstance->rpush($info['list_name'], $message);
                     Queue::getDefaultInstance()->hdel(Queue::messageName($name), $messageId);
                 }
             }
-            Redis::close($name);
         } else {
             foreach ($delays as $messageId) {
                 if (Queue::getDefaultInstance()->hexists(Queue::messageName($name), $messageId)) {
