@@ -2,31 +2,32 @@
 
 namespace App;
 
-class Sockets
+use App\Queue\Base;
+
+class App
 {
     /**
-     * 获取消息
      * ['action'=>'create', 'data' => ['delay'=> 11, 'message' => 'asdf', 'handleId'=>'aaaa'] ]
+     *
+     * @param \Swover\Utils\Request $request
+     * @return mixed
      */
-    public static function run($request) //TODO request 对象
+    public static function http(\Swover\Utils\Request $request)
     {
         try {
-            if (!isset($request['action']) || !isset($request['queue_name'])) {
-                return Handle::response(400, [], 'param error!');
+            if (!$request->get('action')
+                || !$request->get('queue_name')) {
+                return Base::response(400, [], 'param error!');
             }
 
-            $class = self::route($request['action']);
+            $class = self::route($request->get('action'));
             if ($class == false) {
-                return Handle::response(404, [], 'action error!');
-            }
-
-            if (isset($request['data']) && is_string($request['data'])) {
-                $request['data'] = json_decode($request['data'], true);
+                return Base::response(404, [], 'action error!');
             }
 
             return call_user_func([new $class($request), 'handle']);
         } catch (\Exception $e) {
-            return Handle::response(500, [], $e->getMessage());
+            return Base::response(500, [], $e->getMessage());
         }
     }
 

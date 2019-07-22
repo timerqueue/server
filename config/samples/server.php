@@ -20,7 +20,7 @@ return [
         'task_worker_num' => 1,
         'max_request' => 10000,
         'log_file' => dirname(__DIR__).'/runtime/swoole_http.log',
-        'entrance'    => '\App\Sockets::run',
+        'entrance'    => '\App\App::http',
         'async'    => false,
         'signature'   => '\App\Utils\Sign::verify',
         'trace_log'   => true
@@ -36,7 +36,7 @@ return [
         'task_worker_num' => 1,
         'max_request' => 10000,
         'log_file' => dirname(__DIR__).'/runtime/swoole_tcp.log',
-        'entrance'    => '\App\Sockets::run',
+        'entrance'    => '\App\App::http',
         'async'    => false,
         'signature'   => '\App\Utils\Sign::verify',
         'trace_log'   => true

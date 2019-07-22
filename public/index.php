@@ -1,11 +1,19 @@
 <?php
-define('ROOT_DIR', dirname(__DIR__).'/');
+define('ROOT_DIR', dirname(__DIR__) . '/');
 
-require_once ROOT_DIR.'vendor/autoload.php';
+require_once ROOT_DIR . 'vendor/autoload.php';
 
-$request = array_merge($_GET, $_POST);
+$data = [
+    'get' => $_GET,
+    'post' => $_POST,
+    'input' => file_get_contents("php://input"),
+    // 'header' => [], //TODO
+    'server' => $_SERVER,
+    'cookie' => $_COOKIE
+];
+$request = new \Swover\Utils\Request($data);
 
-if (!isset($request['action']) || !$request['action']) {
+if (!$request->get('action')) {
     echo "What do you want?";
     return;
 }
@@ -15,4 +23,4 @@ if (\App\Utils\Sign::verify($request) !== true) {
     return;
 }
 
-echo \App\Sockets::run($request);
+echo \App\App::http($request);

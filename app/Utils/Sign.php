@@ -1,48 +1,43 @@
 <?php
+
 namespace App\Utils;
 
 use Ruesin\Utils\Config;
 
 class Sign
 {
-    public static function build($request, $time, $secret)
+    public static function build($data, $time, $secret)
     {
-        foreach ($request as $key => $val) {
+        foreach ($data as $key => $val) {
             if (is_array($val)) {
                 ksort($val);
-                $request[$key] = json_encode($val, JSON_UNESCAPED_UNICODE);
+                $data[$key] = json_encode($val, JSON_UNESCAPED_UNICODE);
             }
         }
-        ksort($request);
+        ksort($data);
 
-        return md5(date('YmdHis', $time) . substr(md5(json_encode($request, JSON_UNESCAPED_UNICODE) . $time), 8, 16) . $secret);
+        return md5(date('YmdHis', $time) . substr(md5(json_encode($data, JSON_UNESCAPED_UNICODE) . $time), 8, 16) . $secret);
     }
 
-    public static function verify($request)
+    public static function verify(\Swover\Utils\Request $request)
     {
-        if (!isset($request['access_id']) || !$request['access_id']) return false;
+        if (!$request->get('access_id')
+            || !$request->get('sign')
+            || !$request->get('time')) return false;
 
-        if (!isset($request['sign']) || !isset($request['time'])) return false;
-        $sign = $request['sign'];
-        $time = $request['time'];
-
+        $time = $request->get('time');
         if (time() - $time > 100) return false;
 
-        $secret = self::secret($request['access_id']);
+        $secret = Config::get('secrets.' . $request->get('access_id'));
         if (!$secret) return false;
 
-        unset($request['sign'], $request['time'], $request['access_id']);
+        $data = $request->get(); //TODO
+        unset($data['sign'], $data['time'], $data['access_id']);
 
-        $verify = self::build($request, $time, $secret);
+        $verify = self::build($data, $time, $secret);
 
-        if ($verify === $sign) return true;
+        if ($verify === $request->get('sign')) return true;
 
         return false;
-    }
-
-    private static function secret($secretId)
-    {
-        $secrets = Config::get('secrets');
-        return isset($secrets[$secretId]) ? $secrets[$secretId] : false;
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Queue;
 
 use App\Utils\Queue;
@@ -11,12 +12,10 @@ abstract class Base
 
     protected $defaultInstance = null;
 
-    public function __construct($request)
+    public function __construct(\Swover\Utils\Request $request)
     {
-        $this->queue_name = $request['queue_name'];
-        if (isset($request['data'])) {
-            $this->data = $request['data'];
-        }
+        $this->queue_name = $request->get('queue_name');
+        $this->data = $request->get('data', []);
 
         $this->defaultInstance = Queue::getDefaultInstance();
     }
@@ -31,18 +30,18 @@ abstract class Base
     protected function getQueueInfo()
     {
         $info = Queue::getDefaultInstance()->hget(Queue::queueInfoName(), $this->queue_name);
-        if ( !$info ) {
-            throw new \Exception('Queue does not exist!');
+        if (!$info) {
+            throw new \Exception('Queue does not exist!'); // Todo 创建
         }
         return json_decode($info, true);
     }
 
-    public static function response($status = 200, $data = [], $message = 'success')
+    public static function response($status = 200, $data = [], $message = 'success') //TODO
     {
         $result = [
-            'status'  => $status,
+            'status' => $status,
             'message' => $message,
-            'data'    => $data
+            'data' => $data
         ];
         return json_encode($result, JSON_UNESCAPED_UNICODE);
     }
