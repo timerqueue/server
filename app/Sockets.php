@@ -4,27 +4,19 @@ namespace App;
 
 class Sockets
 {
-    private static $routes = [
-        'create' => 'createQueue',
-        'drop' => 'dropQueue',
-        'add' => 'addMessage',
-        'get' => 'getMessage',
-        'del' => 'deleteMessage',
-        //'clear' //todo
-    ];
-
     /**
      * 获取消息
      * ['action'=>'create', 'data' => ['delay'=> 11, 'message' => 'asdf', 'handleId'=>'aaaa'] ]
      */
-    public static function run($request)
+    public static function run($request) //TODO request 对象
     {
         try {
             if (!isset($request['action']) || !isset($request['queue_name'])) {
-                return Handle::response(404, [], 'param error!');
+                return Handle::response(400, [], 'param error!');
             }
 
-            if (!isset(self::$routes[$request['action']])) {
+            $class = self::route($request['action']);
+            if ($class == false) {
                 return Handle::response(404, [], 'action error!');
             }
 
@@ -32,10 +24,26 @@ class Sockets
                 $request['data'] = json_decode($request['data'], true);
             }
 
-            $instance = new Handle($request);
-            return call_user_func([$instance, self::$routes[$request['action']]]);
+            return call_user_func([new $class($request), 'handle']);
         } catch (\Exception $e) {
-            return Handle::response(400, [], $e->getMessage());
+            return Handle::response(500, [], $e->getMessage());
         }
+    }
+
+    /**
+     * @param $action
+     * @return bool | \App\Queue\Base
+     */
+    private static function route($action)
+    {
+        $maps = [
+            'create' => \App\Queue\Create::class,
+            'drop' => \App\Queue\Drop::class,
+            'add' => \App\Queue\Insert::class,
+            'get' => \App\Queue\Select::class,
+            'del' => \App\Queue\Delete::class,
+            'clear' => \App\Queue\Truncate::class,
+        ];
+        return isset($maps[$action]) ? $maps[$action] : false;
     }
 }
