@@ -12,10 +12,10 @@ abstract class Base
 
     protected $defaultInstance = null;
 
-    public function __construct(\Swover\Utils\Request $request)
+    public function __construct($request)
     {
-        $this->queue_name = $request->get('queue_name');
-        $this->data = $request->get('data', []);
+        $this->queue_name = $request['queue_name'];
+        $this->data = $request['data'] ?? [];
 
         $this->defaultInstance = Queue::getDefaultInstance();
     }

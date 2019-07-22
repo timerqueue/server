@@ -29,7 +29,7 @@ class App
                 return Base::response(404, [], 'action error!');
             }
 
-            return call_user_func([new $class($request), 'handle']);
+            return call_user_func([new $class($request->get()), 'handle']);
         } catch (\Exception $e) {
             return Base::response(500, [], $e->getMessage());
         }
@@ -49,13 +49,13 @@ class App
                 return $result;
             }
 
-            $request = new Request(['get'=>[
+            $request =[
                 'queue_name' => $name,
                 'data' => [
                     'info' => json_decode($info, true),
                     'score' => date('YmdHis')
                 ]
-            ]]);
+            ];
 
             (new Wakeup($request))->handle();
             (new Timeout($request))->handle();
