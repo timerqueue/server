@@ -22,26 +22,6 @@ class Queue
         return Config::get('queue.info_name');
     }
 
-    public static function delayName($queue_name)
-    {
-        return $queue_name . Config::get('queue.delay_suffix');
-    }
-
-    public static function messageName($queue_name)
-    {
-        return $queue_name . Config::get('queue.message_suffix');
-    }
-
-    public static function activeName($queue_name)
-    {
-        return $queue_name . Config::get('quque.active_suffix');
-    }
-
-    public static function readName($queue_name)
-    {
-        return $queue_name . Config::get('queue.read_suffix');
-    }
-
     /**
      * 获取默认 Redis 实例
      * @return \Predis\ClientInterface

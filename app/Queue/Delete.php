@@ -2,15 +2,9 @@
 namespace App\Queue;
 
 use App\Utils\Queue;
-use Ruesin\Utils\Redis;
 
 class Delete extends Base
 {
-    /**
-     * 删除消息
-     * @return bool
-     * @throws \Exception
-     */
     public function handle()
     {
         if (!isset($this->data['messageId'])) {
@@ -18,13 +12,13 @@ class Delete extends Base
         }
 
         //消息体
-        $this->defaultInstance->hdel(Queue::messageName($this->queue_name), $this->data['messageId']);
+        $this->defaultInstance->hdel($this->messageName, $this->data['messageId']);
         //延迟
-        Queue::getDelayInstance()->zrem(Queue::delayName($this->queue_name), $this->data['messageId']);
+        Queue::getDelayInstance()->zrem($this->delayName, $this->data['messageId']);
         //已读
-        Queue::getReadInstance()->zrem(Queue::readName($this->queue_name), $this->data['messageId']);
+        Queue::getReadInstance()->zrem($this->readName, $this->data['messageId']);
         //活跃
-        Queue::getActiveInstance()->lrem(Queue::activeName($this->queue_name), 0, $this->data['messageId']);
+        Queue::getActiveInstance()->lrem($this->activeName, 0, $this->data['messageId']);
 
         return self::response(200, [], 'Message deleted successfully!');
     }

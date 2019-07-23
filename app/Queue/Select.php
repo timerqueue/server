@@ -21,17 +21,17 @@ class Select extends Base
             return self::response(200, ['messageId' => 'custom-active-queue', 'content' => $message]);
         }
 
-        $messageId = Queue::getActiveInstance()->lpop(Queue::activeName($this->queue_name));
+        $messageId = Queue::getActiveInstance()->lpop($this->activeName);
         if (!$messageId) {
             return self::response(200, ['messageId' => '', 'content' => ''], 'Message is empty!');
         }
 
-        $message = $this->defaultInstance->hget(Queue::messageName($this->queue_name), $messageId);
+        $message = $this->defaultInstance->hget($this->messageName, $messageId);
         if (!$message) {
             return self::response(400, ['messageId' => $messageId], 'Message body does not exist!');
         }
 
-        Queue::getReadInstance()->zadd(Queue::readName($this->queue_name), date('YmdHis', time() + $info['hide_time']), $messageId);
+        Queue::getReadInstance()->zadd($this->readName, date('YmdHis', time() + $info['hide_time']), $messageId);
 
         return self::response(200, ['messageId' => $messageId, 'content' => $message]);
     }

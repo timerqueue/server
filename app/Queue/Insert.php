@@ -3,7 +3,6 @@
 namespace App\Queue;
 
 use App\Utils\Queue;
-use Ruesin\Utils\Redis;
 
 class Insert extends Base
 {
@@ -37,9 +36,9 @@ class Insert extends Base
 
         do {
             $messageId = md5(uniqid(microtime(true) . $this->queue_name . mt_rand(), true));
-        } while (!$this->defaultInstance->hsetnx(Queue::messageName($this->queue_name), $messageId, $this->data['message']));
+        } while (!$this->defaultInstance->hsetnx($this->messageName, $messageId, $this->data['message']));
 
-        Queue::getDelayInstance()->zadd(Queue::delayName($this->queue_name), date('YmdHis', $deliverTime), $messageId);
+        Queue::getDelayInstance()->zadd($this->delayName, date('YmdHis', $deliverTime), $messageId);
         return self::response(200, ['messageId' => $messageId], 'Message sent successfully!');
     }
 }
