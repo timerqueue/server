@@ -8,9 +8,13 @@ class Wakeup extends Base
 {
     public function handle()
     {
+        $this->connection->multi();
         $delays = $this->connection->zrangebyscore($this->delayName, 0, $this->data['score']);
 
-        if (empty($delays)) return true;
+        if (empty($delays)) {
+            $this->connection->discard();
+            return true;
+        }
 
         $info = $this->data['info'];
 
@@ -31,6 +35,7 @@ class Wakeup extends Base
         }
 
         $this->connection->zremrangebyscore($this->delayName, 0, $this->data['score']);
+        $this->connection->exec();
         return true;
     }
 }
