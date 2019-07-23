@@ -19,7 +19,7 @@ abstract class Base
 
     protected $readName = '';
 
-    protected $defaultInstance = null;
+    protected $connection = null;
 
     public function __construct($request)
     {
@@ -33,7 +33,7 @@ abstract class Base
         $this->activeName = $this->queue_name . $queueConfig['active_suffix'];
         $this->readName = $this->queue_name . $queueConfig['read_suffix'];
 
-        $this->defaultInstance = Connection::default();
+        $this->connection = Connection::default();
     }
 
     abstract function handle();

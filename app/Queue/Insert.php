@@ -36,9 +36,9 @@ class Insert extends Base
 
         do {
             $messageId = md5(uniqid(microtime(true) . $this->queue_name . mt_rand(), true));
-        } while (!$this->defaultInstance->hsetnx($this->messageName, $messageId, $this->data['message']));
+        } while (!$this->connection->hsetnx($this->messageName, $messageId, $this->data['message']));
 
-        $this->defaultInstance->zadd($this->delayName, date('YmdHis', $deliverTime), $messageId);
+        $this->connection->zadd($this->delayName, date('YmdHis', $deliverTime), $messageId);
         return self::response(200, ['messageId' => $messageId], 'Message sent successfully!');
     }
 }
