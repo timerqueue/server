@@ -6,7 +6,6 @@ use App\Queue\Base;
 use App\Queue\Timeout;
 use App\Queue\Wakeup;
 use App\Utils\Queue;
-use Swover\Utils\Request;
 
 class App
 {
@@ -46,10 +45,12 @@ class App
         try {
             $info = Queue::getDefaultInstance()->hget(Queue::queueInfoName(), $name);
             if (!$info) {
+                $class = self::route('drop');
+                call_user_func([new $class(['queue_name' => $name]), 'handle']);
                 return $result;
             }
 
-            $request =[
+            $request = [
                 'queue_name' => $name,
                 'data' => [
                     'info' => json_decode($info, true),
