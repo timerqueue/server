@@ -26,4 +26,24 @@ class Queue
         $info = Connection::default()->hget(self::queueInfoName(), $queueName);
         return $info ? json_decode($info, true) : [];
     }
+
+    /**
+     * 抢占对队列操作的锁
+     * @param $queueName
+     * @return int
+     */
+    public static function lock($queueName)
+    {
+        return Connection::default()->setnx($queueName, 1);
+    }
+
+    /**
+     * 释放锁
+     * @param $queueName
+     * @return int
+     */
+    public static function unlock($queueName)
+    {
+        return Connection::default()->del($queueName);
+    }
 }

@@ -43,6 +43,8 @@ class App
         $name = $instance->lpop(Queue::queueListName());
         if (!$name) return $result;
 
+        if (!Queue::lock($name)) return $result;
+
         try {
             $info = $instance->hget(Queue::queueInfoName(), $name);
             if (!$info) {
@@ -69,7 +71,7 @@ class App
         if ($instance->hexists(Queue::queueInfoName(), $name)) {
             $instance->rpush(Queue::queueListName(), $name);
         }
-
+        Queue::unlock($name);
         return $result;
     }
 
