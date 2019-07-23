@@ -14,7 +14,7 @@ class Insert extends Base
 
         $delay_time = intval($this->data['delay_time'] ?? 0);
 
-        $info = $this->getQueueInfo();
+        $info = Queue::getInfo($this->queue_name);
 
         //创建队列
         if (empty($info)) {

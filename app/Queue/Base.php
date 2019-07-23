@@ -38,16 +38,6 @@ abstract class Base
 
     abstract function handle();
 
-    /**
-     * 获取队列定义信息
-     * @return array
-     */
-    protected function getQueueInfo()
-    {
-        $info = Queue::getDefaultInstance()->hget(Queue::queueInfoName(), $this->queue_name);
-        return $info ? json_decode($info, true): [];
-    }
-
     public static function response($status = 200, $data = [], $message = 'success') //TODO
     {
         $result = [

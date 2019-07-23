@@ -9,7 +9,7 @@ class Select extends Base
 {
     public function handle()
     {
-        $info = $this->getQueueInfo();
+        $info = Queue::getInfo($this->queue_name);
 
         if (empty($info)) {
             return self::response(400, ['messageId' => '', 'content' => ''], 'Queue does not exist!');
