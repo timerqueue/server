@@ -5,6 +5,7 @@ namespace App;
 use App\Queue\Base;
 use App\Queue\Timeout;
 use App\Queue\Wakeup;
+use App\Utils\Connection;
 use App\Utils\Queue;
 
 class App
@@ -38,12 +39,12 @@ class App
     {
         sleep(1);
         $result = true;
-
-        $name = Queue::getDefaultInstance()->lpop(Queue::queueListName());
+        $instance = Connection::default();
+        $name = $instance->lpop(Queue::queueListName());
         if (!$name) return $result;
 
         try {
-            $info = Queue::getDefaultInstance()->hget(Queue::queueInfoName(), $name);
+            $info = $instance->hget(Queue::queueInfoName(), $name);
             if (!$info) {
                 $class = self::route('drop');
                 call_user_func([new $class(['queue_name' => $name]), 'handle']);
@@ -65,8 +66,8 @@ class App
             $result = false;
         }
 
-        if (Queue::getDefaultInstance()->hexists(Queue::queueInfoName(), $name)) {
-            Queue::getDefaultInstance()->rpush(Queue::queueListName(), $name);
+        if ($instance->hexists(Queue::queueInfoName(), $name)) {
+            $instance->rpush(Queue::queueListName(), $name);
         }
 
         return $result;

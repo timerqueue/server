@@ -1,6 +1,8 @@
 <?php
+
 namespace App\Queue;
 
+use App\Utils\Connection;
 use App\Utils\Queue;
 
 class Drop extends Base
@@ -10,11 +12,11 @@ class Drop extends Base
         //删除消息体
         $this->defaultInstance->del([$this->messageName]);
         //删除延时消息
-        Queue::getDelayInstance()->del([$this->delayName]);
+        Connection::delay()->del([$this->delayName]);
         //删除已读消息
-        Queue::getReadInstance()->del([$this->readName]);
+        Connection::read()->del([$this->readName]);
         //删除活跃消息
-        Queue::getActiveInstance()->del([$this->activeName]);
+        Connection::active()->del([$this->activeName]);
 
         //删除队列定义
         $this->defaultInstance->hdel(Queue::queueInfoName(), $this->queue_name);
@@ -23,11 +25,11 @@ class Drop extends Base
         //删除消息体
         $this->defaultInstance->del([$this->messageName]);
         //删除延时消息
-        Queue::getDelayInstance()->del([$this->delayName]);
+        Connection::delay()->del([$this->delayName]);
         //删除已读消息
-        Queue::getReadInstance()->del([$this->readName]);
+        Connection::read()->del([$this->readName]);
         //删除活跃消息
-        Queue::getActiveInstance()->del([$this->activeName]);
+        Connection::active()->del([$this->activeName]);
 
         return self::response(200, [], 'Queue deleted successfully!');
     }

@@ -2,6 +2,7 @@
 
 namespace App\Queue;
 
+use App\Utils\Connection;
 use App\Utils\Queue;
 use Ruesin\Utils\Redis;
 
@@ -21,7 +22,7 @@ class Select extends Base
             return self::response(200, ['messageId' => 'custom-active-queue', 'content' => $message]);
         }
 
-        $messageId = Queue::getActiveInstance()->lpop($this->activeName);
+        $messageId = Connection::active()->lpop($this->activeName);
         if (!$messageId) {
             return self::response(200, ['messageId' => '', 'content' => ''], 'Message is empty!');
         }
@@ -31,7 +32,7 @@ class Select extends Base
             return self::response(400, ['messageId' => $messageId], 'Message body does not exist!');
         }
 
-        Queue::getReadInstance()->zadd($this->readName, date('YmdHis', time() + $info['hide_time']), $messageId);
+        Connection::read()->zadd($this->readName, date('YmdHis', time() + $info['hide_time']), $messageId);
 
         return self::response(200, ['messageId' => $messageId, 'content' => $message]);
     }

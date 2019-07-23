@@ -2,7 +2,7 @@
 
 namespace App\Queue;
 
-use App\Utils\Queue;
+use App\Utils\Connection;
 use Ruesin\Utils\Config;
 
 abstract class Base
@@ -33,7 +33,7 @@ abstract class Base
         $this->activeName = $this->queue_name . $queueConfig['active_suffix'];
         $this->readName = $this->queue_name . $queueConfig['read_suffix'];
 
-        $this->defaultInstance = Queue::getDefaultInstance();
+        $this->defaultInstance = Connection::default();
     }
 
     abstract function handle();

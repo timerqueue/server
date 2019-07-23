@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Queue;
 
 use App\Utils\Queue;
@@ -14,7 +15,7 @@ class Create extends Base
 
         $information = [
             'delay_time' => $delay_time > 0 ? $delay_time : 30,
-            'hide_time'  => max(intval($this->data['hide_time'] ?? 0), 30), //隐藏时间最小30秒
+            'hide_time' => max(intval($this->data['hide_time'] ?? 0), 30), //隐藏时间最小30秒
         ];
 
         if (($this->data['config'] ?? false) && ($this->data['list_name'] ?? false)) {
