@@ -34,11 +34,14 @@ class Insert extends Base
             return self::response(400, [], 'Delay time less than 0!');
         }
 
-        do {
+        for ($insert = 0; $insert < 10; $insert++) {
             $messageId = md5(uniqid(microtime(true) . $this->queue_name . mt_rand(), true));
-        } while (!$this->connection->hsetnx($this->messageName, $messageId, $this->data['message']));
+            if ($this->connection->hsetnx($this->messageName, $messageId, $this->data['message'])) {
+                $this->connection->zadd($this->delayName, date('YmdHis', $deliverTime), $messageId);
+                return self::response(200, ['messageId' => $messageId], 'Message sent successfully!');
+            }
+        }
 
-        $this->connection->zadd($this->delayName, date('YmdHis', $deliverTime), $messageId);
-        return self::response(200, ['messageId' => $messageId], 'Message sent successfully!');
+        return self::response(500, [], 'Insert Message fail!');
     }
 }
