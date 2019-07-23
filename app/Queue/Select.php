@@ -16,11 +16,10 @@ class Select extends Base
         }
 
         if (isset($info['config']['host'])) {
-            $message = Redis::createInstance($info['list_name'], $info['config'])
-                ->lpop($info['list_name']);
-            return self::response(200, ['messageId' => 'custom-active-queue', 'content' => $message]);
+            return $this->thirdMessage($info);
         }
 
+        //TODO 抢锁激活消息
         $this->connection->multi();
         $messageId = $this->connection->lpop($this->activeName);
         if (!$messageId) {
@@ -39,4 +38,16 @@ class Select extends Base
         return self::response(200, ['messageId' => $messageId, 'content' => $message]);
     }
 
+    private function thirdMessage($info)
+    {
+        for ($i = 1; $i <= 2; $i++) {
+            $message = Redis::createInstance($info['list_name'], $info['config'])
+                ->lpop($info['list_name']);
+            if ($message) {
+                return self::response(200, ['messageId' => 'custom-active-queue', 'content' => $message]);
+            }
+            //TODO 激活消息
+        }
+        return self::response(200, ['messageId' => '', 'content' => ''], 'Message is empty!');
+    }
 }
