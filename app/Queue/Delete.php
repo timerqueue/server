@@ -2,8 +2,6 @@
 
 namespace App\Queue;
 
-use App\Utils\Connection;
-
 class Delete extends Base
 {
     public function handle()
@@ -15,11 +13,11 @@ class Delete extends Base
         //消息体
         $this->defaultInstance->hdel($this->messageName, $this->data['messageId']);
         //延迟
-        Connection::delay()->zrem($this->delayName, $this->data['messageId']);
+        $this->defaultInstance->zrem($this->delayName, $this->data['messageId']);
         //已读
-        Connection::read()->zrem($this->readName, $this->data['messageId']);
+        $this->defaultInstance->zrem($this->readName, $this->data['messageId']);
         //活跃
-        Connection::active()->lrem($this->activeName, 0, $this->data['messageId']);
+        $this->defaultInstance->lrem($this->activeName, 0, $this->data['messageId']);
 
         return self::response(200, [], 'Message deleted successfully!');
     }

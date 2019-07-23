@@ -2,7 +2,6 @@
 
 namespace App\Queue;
 
-use App\Utils\Connection;
 use App\Utils\Queue;
 
 class Insert extends Base
@@ -39,7 +38,7 @@ class Insert extends Base
             $messageId = md5(uniqid(microtime(true) . $this->queue_name . mt_rand(), true));
         } while (!$this->defaultInstance->hsetnx($this->messageName, $messageId, $this->data['message']));
 
-        Connection::delay()->zadd($this->delayName, date('YmdHis', $deliverTime), $messageId);
+        $this->defaultInstance->zadd($this->delayName, date('YmdHis', $deliverTime), $messageId);
         return self::response(200, ['messageId' => $messageId], 'Message sent successfully!');
     }
 }

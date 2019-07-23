@@ -2,14 +2,13 @@
 
 namespace App\Queue;
 
-use App\Utils\Connection;
 use Ruesin\Utils\Redis;
 
 class Wakeup extends Base
 {
     public function handle()
     {
-        $delays = Connection::delay()->zrangebyscore($this->delayName, 0, $this->data['score']);
+        $delays = $this->defaultInstance->zrangebyscore($this->delayName, 0, $this->data['score']);
 
         if (empty($delays)) return true;
 
@@ -26,12 +25,12 @@ class Wakeup extends Base
         } else {
             foreach ($delays as $messageId) {
                 if ($this->defaultInstance->hexists($this->messageName, $messageId)) {
-                    Connection::active()->rpush($this->activeName, $messageId);
+                    $this->defaultInstance->rpush($this->activeName, $messageId);
                 }
             }
         }
 
-        Connection::delay()->zremrangebyscore($this->delayName, 0, $this->data['score']);
+        $this->defaultInstance->zremrangebyscore($this->delayName, 0, $this->data['score']);
         return true;
     }
 }
