@@ -25,15 +25,11 @@ abstract class Base
     /**
      * 获取队列定义信息
      * @return array
-     * @throws \Exception
      */
     protected function getQueueInfo()
     {
         $info = Queue::getDefaultInstance()->hget(Queue::queueInfoName(), $this->queue_name);
-        if (!$info) {
-            throw new \Exception('Queue does not exist!'); // Todo 创建
-        }
-        return json_decode($info, true);
+        return $info ? json_decode($info, true): [];
     }
 
     public static function response($status = 200, $data = [], $message = 'success') //TODO

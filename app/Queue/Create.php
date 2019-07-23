@@ -7,13 +7,14 @@ class Create extends Base
 {
     public function handle()
     {
-        if (!isset($this->data['delay_time']) || intval($this->data['delay_time']) <= 0) {
+        $delay_time = intval($this->data['delay_time'] ?? 0);
+        if ($delay_time <= 0) {
             return self::response(400, [], 'Param delay_time error!');
         }
 
         $information = [
-            'delay_time' => intval($this->data['delay_time']),
-            'hide_time'  => isset($this->data['hide_time']) ? max(intval($this->data['hide_time']), 30) : 30
+            'delay_time' => $delay_time > 0 ? $delay_time : 30,
+            'hide_time'  => max(intval($this->data['hide_time'] ?? 0), 30), //隐藏时间最小30秒
         ];
 
         if (($this->data['config'] ?? false) && ($this->data['list_name'] ?? false)) {

@@ -11,6 +11,10 @@ class Select extends Base
     {
         $info = $this->getQueueInfo();
 
+        if (empty($info)) {
+            return self::response(400, ['messageId' => '', 'content' => ''], 'Queue does not exist!');
+        }
+
         if (isset($info['config']['host'])) {
             $message = Redis::createInstance($info['list_name'], $info['config'])
                 ->lpop($info['list_name']);

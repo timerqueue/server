@@ -13,18 +13,22 @@ class Insert extends Base
             return self::response(400, [], 'Message body error!');
         }
 
-        //TODO 队列不存在时创建队列
+        $delay_time = intval($this->data['delay_time'] ?? 0);
+
         $info = $this->getQueueInfo();
 
-        if (isset($this->data['delay_time']) && $this->data['delay_time'] > 0) {
-            $delay = $this->data['delay_time'];
-        } else {
-            $delay = $info['delay_time'];
+        //创建队列
+        if (empty($info)) {
+            $queue_time = $delay_time > 0 ? $delay_time : 30;
+            (new Create(['queue_name' => $this->queue_name, 'data' => ['delay_time' => $queue_time]]))->handle();
+            $info['delay_time'] = $queue_time;
         }
-        $deliverTime = time() + $delay;
 
+        $deliverTime = time() + ($delay_time > 0 ? $delay_time : $info['delay_time']);
+
+        //TODO 有效性校验
         if (isset($this->data['deliver_time'])) {
-            $deliverTime = intval(substr($this->data['deliver_time'], 0, 10)); //todo 时间戳  长度判断
+            $deliverTime = intval(substr($this->data['deliver_time'], 0, 10));
         }
 
         if ($deliverTime < time()) {
