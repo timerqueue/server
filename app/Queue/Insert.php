@@ -30,7 +30,6 @@ class Insert extends Base
 
         $deliverTime = time() + ($delay_time > 0 ? $delay_time : $info['delay_time']);
 
-        //TODO 有效性校验
         if (isset($this->data['deliver_time'])) {
             $deliverTime = intval(substr($this->data['deliver_time'], 0, 10));
         }
@@ -41,10 +40,13 @@ class Insert extends Base
 
         for ($insert = 0; $insert < 10; $insert++) {
             $messageId = md5(uniqid(microtime(true) . $this->queue_name . mt_rand(), true));
+            $this->connection->multi();
             if ($this->connection->hsetnx($this->messageName, $messageId, $this->data['message'])) {
-                $this->connection->zadd($this->delayName, date('YmdHis', $deliverTime), $messageId);
+                $this->connection->zadd($this->delayName, date('YmdHis', $deliverTime), $messageId); //TODO
+                $this->connection->exec();
                 return self::response(200, ['messageId' => $messageId], 'Message sent successfully!');
             }
+            $this->connection->discard();
         }
 
         return self::response(500, [], 'Insert Message fail!');
