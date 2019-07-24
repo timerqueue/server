@@ -13,7 +13,11 @@ class Drop extends Base
 {
     public function handle()
     {
-        //TODO lock
+        for ($i = 0; $i < 5; $i++) {
+            if (!Queue::lock($this->queue_name))
+                usleep(50000);
+        }
+
         $this->connection->transaction()
             ->del([
                 $this->messageName,
