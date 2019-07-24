@@ -4,6 +4,11 @@ namespace App\Queue;
 
 use App\Utils\Queue;
 
+/**
+ * 创建延时队列
+ *
+ * @package App\Queue
+ */
 class Create extends Base
 {
     public function handle()

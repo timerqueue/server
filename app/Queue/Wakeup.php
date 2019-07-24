@@ -4,6 +4,11 @@ namespace App\Queue;
 
 use Ruesin\Utils\Redis;
 
+/**
+ * 延时消息到期激活
+ *
+ * @package App\Queue
+ */
 class Wakeup extends Base
 {
     public function handle()

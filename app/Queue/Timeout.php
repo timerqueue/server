@@ -2,6 +2,11 @@
 
 namespace App\Queue;
 
+/**
+ * 已读超时的消息重新放入活跃消息
+ *
+ * @package App\Queue
+ */
 class Timeout extends Base
 {
     public function handle()

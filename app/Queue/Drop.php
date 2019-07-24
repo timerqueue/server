@@ -4,10 +4,16 @@ namespace App\Queue;
 
 use App\Utils\Queue;
 
+/**
+ * 删除延时队列
+ *
+ * @package App\Queue
+ */
 class Drop extends Base
 {
     public function handle()
     {
+        //TODO lock
         $this->connection->transaction()
             ->del([
                 $this->messageName,

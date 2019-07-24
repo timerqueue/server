@@ -4,6 +4,11 @@ namespace App\Queue;
 
 use App\Utils\Queue;
 
+/**
+ * 添加延时消息
+ *
+ * @package App\Queue
+ */
 class Insert extends Base
 {
     public function handle()

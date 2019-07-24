@@ -2,6 +2,11 @@
 
 namespace App\Queue;
 
+/**
+ * 删除指定消息
+ *
+ * @package App\Queue
+ */
 class Delete extends Base
 {
     public function handle()

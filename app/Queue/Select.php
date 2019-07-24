@@ -5,6 +5,11 @@ namespace App\Queue;
 use App\Utils\Queue;
 use Ruesin\Utils\Redis;
 
+/**
+ * 获取延时消息
+ *
+ * @package App\Queue
+ */
 class Select extends Base
 {
     private $response = '';
