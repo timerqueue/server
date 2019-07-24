@@ -40,38 +40,25 @@ class App
         sleep(1);
         $result = true;
         $instance = Connection::default();
-        $name = $instance->lpop(Queue::queueListName());
-        if (!$name) return $result;
-
-        if (!Queue::lock($name)) return $result;
+        $queueName = $instance->lpop(Queue::queueListName());
+        if (!$queueName) return $result;
 
         try {
-            $info = $instance->hget(Queue::queueInfoName(), $name);
-            if (!$info) {
+            $queueInfo = $instance->hget(Queue::queueInfoName(), $queueName);
+            if (!$queueInfo) {
                 $class = self::route('drop');
-                call_user_func([new $class(['queue_name' => $name]), 'handle']);
+                call_user_func([new $class(['queue_name' => $queueName]), 'handle']);
                 return $result;
             }
 
-            $request = [
-                'queue_name' => $name,
-                'data' => [
-                    'info' => json_decode($info, true),
-                    'score' => date('YmdHis')
-                ]
-            ];
-
-            (new Wakeup($request))->handle();
-            (new Timeout($request))->handle();
-
+            Queue::active($queueName, $queueInfo);
         } catch (\Exception $e) {
             $result = false;
         }
 
-        if ($instance->hexists(Queue::queueInfoName(), $name)) {
-            $instance->rpush(Queue::queueListName(), $name);
+        if ($instance->hexists(Queue::queueInfoName(), $queueName)) {
+            $instance->rpush(Queue::queueListName(), $queueName);
         }
-        Queue::unlock($name);
         return $result;
     }
 

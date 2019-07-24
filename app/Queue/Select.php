@@ -7,7 +7,7 @@ use Ruesin\Utils\Redis;
 
 class Select extends Base
 {
-    private $lock = false;
+    private $response = '';
 
     public function handle()
     {
@@ -17,68 +17,51 @@ class Select extends Base
             return self::response(400, ['messageId' => '', 'content' => ''], 'Queue does not exist!');
         }
 
-        if (isset($info['config']['host'])) {
-            $message = $this->thirdMessage($info);
-        } else {
-            $message = $this->readMessage($info);
+        for ($i = 1; $i <= 2; $i++) {
+            if (isset($info['config']['host'])) {
+                if ($this->thirdMessage($info)) break;
+            } else {
+                if ($this->readMessage($info)) break;
+            }
+            if ($i == 1)
+                Queue::active($this->queue_name, $info);
         }
-        if ($this->lock = true) {
-            $this->lock = false;
-            Queue::unlock($this->queue_name);
-        }
-        return $message;
+
+        return $this->response;
     }
 
-    private function readMessage($info, $retry = 0)
+    private function readMessage($info)
     {
-        if ($retry > 0 && Queue::lock($this->queue_name)) {
-            $this->lock = true;
-            $this->wakeup();
-            $this->timeout();
-        }
         $this->connection->multi();
         $messageId = $this->connection->lpop($this->activeName);
         if (!$messageId) {
             $this->connection->discard();
-            if ($retry < 0) return $this->readMessage($info, $retry + 1);
-            return self::response(200, ['messageId' => '', 'content' => ''], 'Message is empty!');
+            $this->response = self::response(200, ['messageId' => '', 'content' => ''], 'Message is empty!');
+            return false;
         }
 
         $message = $this->connection->hget($this->messageName, $messageId);
         if (!$message) {
             $this->connection->discard();
-            if ($retry < 0) return $this->readMessage($info, $retry + 1);
-            return self::response(400, ['messageId' => $messageId], 'Message body does not exist!');
+            $this->response = self::response(400, ['messageId' => $messageId], 'Message body does not exist!');
+            return false;
         }
 
         $this->connection->zadd($this->readName, date('YmdHis', time() + $info['hide_time']), $messageId);
         $this->connection->exec();
-        return self::response(200, ['messageId' => $messageId, 'content' => $message]);
+        $this->response = self::response(200, ['messageId' => $messageId, 'content' => $message]);
+        return true;
     }
 
     private function thirdMessage($info)
     {
-        for ($i = 1; $i <= 2; $i++) {
-            $message = Redis::createInstance($info['list_name'], $info['config'])
-                ->lpop($info['list_name']);
-            if ($message) {
-                return self::response(200, ['messageId' => 'custom-active-queue', 'content' => $message]);
-            }
-            if (Queue::lock($this->queue_name)) {
-                $this->lock = true;
-                $this->wakeup();
-            }
+        $message = Redis::createInstance($info['list_name'], $info['config'])
+            ->lpop($info['list_name']);
+        if ($message) {
+            $this->response = self::response(200, ['messageId' => 'custom-active-queue', 'content' => $message]);
+            return false;
         }
-        return self::response(200, ['messageId' => '', 'content' => ''], 'Message is empty!');
-    }
-
-    private function wakeup()
-    {
-
-    }
-
-    private function timeout()
-    {
-
+        $this->response = self::response(200, ['messageId' => '', 'content' => ''], 'Message is empty!');
+        return true;
     }
 }
