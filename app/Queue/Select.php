@@ -7,6 +7,8 @@ use Ruesin\Utils\Redis;
 
 class Select extends Base
 {
+    private $lock = false;
+
     public function handle()
     {
         $info = Queue::getInfo($this->queue_name);
@@ -16,20 +18,36 @@ class Select extends Base
         }
 
         if (isset($info['config']['host'])) {
-            return $this->thirdMessage($info);
+            $message = $this->thirdMessage($info);
+        } else {
+            $message = $this->readMessage($info);
         }
+        if ($this->lock = true) {
+            $this->lock = false;
+            Queue::unlock($this->queue_name);
+        }
+        return $message;
+    }
 
-        //TODO 抢锁激活消息
+    private function readMessage($info, $retry = 0)
+    {
+        if ($retry > 0 && Queue::lock($this->queue_name)) {
+            $this->lock = true;
+            $this->wakeup();
+            $this->timeout();
+        }
         $this->connection->multi();
         $messageId = $this->connection->lpop($this->activeName);
         if (!$messageId) {
             $this->connection->discard();
+            if ($retry < 0) return $this->readMessage($info, $retry + 1);
             return self::response(200, ['messageId' => '', 'content' => ''], 'Message is empty!');
         }
 
         $message = $this->connection->hget($this->messageName, $messageId);
         if (!$message) {
             $this->connection->discard();
+            if ($retry < 0) return $this->readMessage($info, $retry + 1);
             return self::response(400, ['messageId' => $messageId], 'Message body does not exist!');
         }
 
@@ -46,8 +64,21 @@ class Select extends Base
             if ($message) {
                 return self::response(200, ['messageId' => 'custom-active-queue', 'content' => $message]);
             }
-            //TODO 激活消息
+            if (Queue::lock($this->queue_name)) {
+                $this->lock = true;
+                $this->wakeup();
+            }
         }
         return self::response(200, ['messageId' => '', 'content' => ''], 'Message is empty!');
+    }
+
+    private function wakeup()
+    {
+
+    }
+
+    private function timeout()
+    {
+
     }
 }
