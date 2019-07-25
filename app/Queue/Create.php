@@ -28,14 +28,11 @@ class Create extends Base
             $information['config'] = $this->data['config'];
         }
 
-        $this->connection->multi();
         if ($this->connection->hsetnx(Queue::queueInfoName(), $this->queue_name, json_encode($information, JSON_UNESCAPED_UNICODE))) {
             $this->connection->rpush(Queue::queueListName(), $this->queue_name);
         } else {
-            $this->connection->discard();
             return self::response(400, [], 'Queue already exists!');
         }
-        $this->connection->exec();
         return self::response(200, [], 'Queue created successfully!');
     }
 }
