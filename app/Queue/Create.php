@@ -28,11 +28,23 @@ class Create extends Base
             $information['config'] = $this->data['config'];
         }
 
-        if ($this->connection->hsetnx(Queue::queueInfoName(), $this->queue_name, json_encode($information, JSON_UNESCAPED_UNICODE))) {
-            $this->connection->rpush(Queue::queueListName(), $this->queue_name);
-        } else {
+        $created = $this->connection->eval($this->create(), 4, Queue::queueInfoName(), Queue::queueListName(),
+            $this->queue_name, json_encode($information, JSON_UNESCAPED_UNICODE));
+
+        if (!$created) {
             return self::response(400, [], 'Queue already exists!');
         }
         return self::response(200, [], 'Queue created successfully!');
+    }
+
+    private function create()
+    {
+        return <<<'LUA'
+local job = redis.call('HSETNX', KEYS[1], KEYS[3], KEYS[4]);
+if job == 0 then
+    return false;
+end;
+return redis.call('RPUSH', KEYS[2], KEYS[3]); 
+LUA;
     }
 }
