@@ -28,7 +28,7 @@ class Create extends Base
             $information['config'] = $this->data['config'];
         }
 
-        $created = $this->connection->eval($this->create(), 4, Queue::queueInfoName(), Queue::queueListName(),
+        $created = $this->connection->eval($this->create(), 2, Queue::queueInfoName(), Queue::queueListName(),
             $this->queue_name, json_encode($information, JSON_UNESCAPED_UNICODE));
 
         if (!$created) {
@@ -40,11 +40,11 @@ class Create extends Base
     private function create()
     {
         return <<<'LUA'
-local job = redis.call('HSETNX', KEYS[1], KEYS[3], KEYS[4]);
+local job = redis.call('HSETNX', KEYS[1], ARGV[1], ARGV[2]);
 if job == 0 then
     return false;
 end;
-return redis.call('RPUSH', KEYS[2], KEYS[3]); 
+return redis.call('RPUSH', KEYS[2], ARGV[1]); 
 LUA;
     }
 }
