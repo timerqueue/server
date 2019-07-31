@@ -2,32 +2,38 @@
 
 namespace Delay\Tests;
 
-use Ruesin\Utils\Config;
 use PHPUnit\Framework\TestCase;
+use Swover\Utils\Request;
 
 class QueueTest extends TestCase
 {
-    public function request($operation, $queue_name, $data = [])
+    /**
+     * @param $action
+     * @param $queue_name
+     * @param array $data
+     * @return Request
+     */
+    public function buildRequest($action, $queue_name, $data = [])
     {
-        $client = new \GuzzleHttp\Client();
         $request = [
-            'action' => $operation,
+            'action' => $action,
             'queue_name' => $queue_name,
+            'data' => $data
         ];
-        if (!empty($data)) {
-            $request['data'] = $data;
-        }
-        $host = Config::get('server.http.host', '127.0.0.1');
-        $port = Config::get('server.http.port', '9501');
+        return new Request(['get' => $request]);
+    }
 
-        $response = $client->get("http://{$host}:{$port}?" . http_build_query($request));
-        return json_decode($response->getBody(), true);
+    public function callHttp($action, $queue_name, $data = [])
+    {
+        $request = $this->buildRequest($action, $queue_name, $data);
+        $json = \App\App::http($request);
+        return json_decode($json, true);
     }
 
     public function queueNameProvider()
     {
         return [[
-            'config' => 'ruesin_' . time()
+            'config' => 'test_delay_server_' . date('YmdHis')
         ]];
     }
 
@@ -39,12 +45,12 @@ class QueueTest extends TestCase
     {
         $data = [
             'delay_time' => 10,
-            'hid_time' => 10,
+            'hide_time' => 10,
         ];
-        $content = $this->request('create', $queueName, $data);
+        $content = $this->callHttp('create', $queueName, $data);
         $this->assertEquals('200', $content['status']);
 
-        $content = $this->request('create', $queueName, $data);
+        $content = $this->callHttp('create', $queueName, $data);
         $this->assertEquals('400', $content['status']);
     }
 
@@ -54,7 +60,7 @@ class QueueTest extends TestCase
      */
     public function testDrop($queueName)
     {
-        $content = $this->request('drop', $queueName);
+        $content = $this->callHttp('drop', $queueName);
         $this->assertEquals('200', $content['status']);
     }
 }

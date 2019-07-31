@@ -74,6 +74,6 @@ class App
             'del' => \App\Queue\Delete::class,
             'clear' => \App\Queue\Truncate::class,
         ];
-        return isset($maps[$action]) ? $maps[$action] : false;
+        return $maps[$action] ?? false;
     }
 }
