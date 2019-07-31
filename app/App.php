@@ -3,8 +3,6 @@
 namespace App;
 
 use App\Queue\Base;
-use App\Queue\Timeout;
-use App\Queue\Wakeup;
 use App\Utils\Connection;
 use App\Utils\Queue;
 
